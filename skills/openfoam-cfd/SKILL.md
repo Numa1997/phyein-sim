@@ -26,7 +26,8 @@ Picture: the water is a coloured fog, α its density; gravity pulls the heavy fo
 
 ## 2. The four validated cases
 
-Times are wall-clock on 2 cores inside the image, measured 11 November 2026 (a runner has 4 vCPU: expect somewhat faster; not measured).
+Times are wall-clock on 2 cores inside the image, measured 11 November 2026. On GitHub's runners (12 November 2026) every case reproduced the same error; times there:
+cavity 4 s (N=64: 46 s), dam break 57 s, sloshing 110 s, glass 115 s, cylinder 194 s on 4 ranks.
 
 ### 2.1 Lid-driven cavity vs Ghia et al. 1982 (`cavity`, icoFoam) — the solver check
 Square box of side L with the lid sliding at U. Parameters: `L U Re N Co nTurn` (Re 100, 400, 1000 have tabulated profiles in `check.py`).
@@ -41,7 +42,8 @@ t_end = T_end √(a/g)/n, with n = √n2 (not n2: a slip of exactly this kind en
 Benchmark: Martin & Moyce 1952, Phil. Trans. R. Soc. A 244:312–324, Table 2 (n² = 2), read at the first cell row `yRow`. The paper's time zero is ambiguous (the gate lifts
 in finite time), so `check.py` shifts time so that Z = 1.44 occurs at T = 1.19 (the paper's own normalisation point) and compares Z ≤ 4.6.
 **Measured**: Na = 20 (cells across a), n² = 2: max |ΔT| = **0.196** (tolerance 0.25), rms 0.151; late surge speed dZ/dT = **1.73** against the paper's 1.71 (+1.2 %), 55 s
-(75 s with the film). The margin to the tolerance is thin: do not coarsen below Na = 20. The paper itself notes retardation at small scale (surface tension and viscosity) for Z > 5.
+(75 s with the film). The margin to the tolerance is thin: do not coarsen below Na = 20. Refining does not close it: Na = 40 gave 0.197 and 1.72 (728 s on a runner), so the remaining difference is physics and the paper's
+time origin, not the grid. The paper itself notes retardation at small scale (surface tension and viscosity) for Z > 5.
 
 ### 2.3 Sloshing in a cylinder and in the tulip glass (`slosh`, interFoam, 3D)
 Liquid depth h in a vertical cylinder of radius R, released from a small tilt of the free surface (z = h + εx). Derivation of the benchmark: for small waves the flow is

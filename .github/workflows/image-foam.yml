@@ -22,9 +22,9 @@ jobs:
           IMG=ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/phyein-foam
           echo "IMG=$IMG" >> "$GITHUB_ENV"
           # the source label links the GHCR package to this repository, which lets GITHUB_TOKEN push to it.
-          # --provenance=false: without it the runner builds an image index with an attestation manifest that carries no label,
-          # and the registry refused the first push of a NEW package with "denied" (seen 11 Nov 2026)
-          docker build --provenance=false -f images/foam/Dockerfile \
+          # Seen 11 Nov 2026: the very first push of a NEW package was refused ("error from registry: denied") after all layers
+          # had uploaded; re-running the workflow succeeded with and without --provenance=false, so the cause is not known. Re-run once.
+          docker build -f images/foam/Dockerfile \
             --label "org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}" \
             --label "org.opencontainers.image.revision=${{ github.sha }}" \
             -t "$IMG:${{ github.sha }}" -t "$IMG:latest" .

@@ -20,6 +20,8 @@ gives the generalised eigenproblem **K x = ω² M x** (SLEPc, shift-and-invert).
 
 ## 2. The four validated cases (times on 2 cores inside the image, 11 November 2026)
 
+On GitHub's runners (12 November 2026) all four reproduced the same errors; times there: lens 23 s (einzel 29 s), beam 7 s, heat 1 s, fluidtopo 26 s.
+
 ### 2.1 Electron lens (`lens`) vs Davisson & Calbick 1931 — for the electron-beam column
 Electrons of charge −e travel along z through a rotationally symmetric field. With the potential φ(r,z) measured from the cathode, kinetic energy = eφ, and away from charge
 Laplace holds: (1/r)∂_r(r ∂_rφ) + ∂²_zφ = 0, weak form ∫ r ∇φ·∇v dr dz = 0 (the factor r is the area element of the axisymmetric problem). The paraxial ray equation

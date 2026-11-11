@@ -64,8 +64,15 @@ A run whose case misses its benchmark ends **red** (the step exits with the case
 before telling the user how long something has run. Starting a run acts on the user's account: give the time estimate and get a yes.
 
 **Sizing before you launch** (say the number to the user; over 10 minutes needs an honest estimate): time the coarsest grid, scale by the cell count to the power 4/3
-for explicit 3D (cells × time steps), add film time (about 1 s per 10 frames for 960×540). On a runner, expect about the speed of this sandbox's 2 cores, with 4 ranks
-instead of 2 (about 1.6× faster, not 2×; unmeasured on GitHub). A job that needs more than 16 GB or 6 h is killed and returns nothing: split or coarsen.
+for explicit 3D (cells × time steps), add film time (about 1 s per 10 frames for 960×540). Measured on GitHub's runners (12 Nov 2026): serial cases take the same time as in the sandbox (dam break 57 s vs 55 s, sloshing 110 s vs 106 s);
+the 4-rank cylinder took 194 s against 339 s on 2 ranks (1.75×); FEM cases were 1.3–1.7× faster. Add about 1 minute per job for pulling the image. A job that needs more than 16 GB or 6 h is killed and returns nothing: split or coarsen.
+
+**On Kaggle** (no Docker there; one long or memory-hungry run: 4 cores, 31 GB, 12 h, Ubuntu 24.04, Python 3.13, NumPy 2.1, measured 12 Nov 2026). `kaggle/bootstrap.sh <foam|fem>`
+installs the same releases natively (OpenFOAM v2512 from dl.openfoam.com; DOLFINx 0.11 from conda-forge with micromamba), `source kaggle/env.sh <tool>` puts the same runners on the PATH, and
+`kaggle/kernel.py` is the whole script notebook (edit OWNER, REF, TOOL, CASE, SETS, NP; Internet on, GPU off). Launch it with the Kaggle connector as the `kaggle-gpu-run` skill describes.
+The GPU helps JAX only; do not spend GPU quota on OpenFOAM or DOLFINx. No ParaView on Kaggle: film the downloaded run in the foam image. Sweeps belong on GitHub (20 at once).
+**State: the install path is not yet proven on Kaggle.** The first test session had no internet although the switch was saved as on; Kaggle gives internet (and GPU) only to
+phone-verified accounts. Check `HANDOVER.md`, section Kaggle, for whether this has been resolved before relying on it.
 
 ### 3b. Structural topology optimisation (repository `phyein-topopt`, image `phyein-topopt`; this replaces the old `topopt-toolchain` skill)
 
@@ -122,6 +129,9 @@ for that exact action. A yes covers only what it names. Ask for all you will nee
 | `np.trapz` missing | NumPy 2 renamed it `np.trapezoid`, the image has 1.26 | `_trapz = getattr(np, "trapezoid", None) or np.trapz` |
 | Film: domain tiny, bar labels invisible | camera reset on first render; white text on white | render once, then set camera; black bar text (fixed in `film.py`) |
 | A run is green but the benchmark was missed | exit code swallowed (`\|\| true`) | the step exits with the case's verdict; artifacts upload `if: always()` |
+| First push of a NEW ghcr.io package: "error from registry: denied" after all layers uploaded | unknown (label and permissions were correct) | re-run the workflow once; the second push succeeded |
+| Kaggle: `Temporary failure resolving ...`, nothing installs | session has no internet: account not phone-verified, or Internet switch off | the user verifies the phone number in Kaggle's settings; then Internet on |
+| Creating a public repository from a session is refused | the session's safety layer | the user creates it at github.com/new (4 clicks) and gives the Claude GitHub App access |
 | Daemon died mid-session | sandbox limits | restart `dockerd`; images persist |
 | `rm -rf` of a run folder refused by the safety check | a guard against deleting too much | do not work around it; use a fresh folder and tell the user |
 

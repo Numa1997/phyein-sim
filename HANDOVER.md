@@ -4,9 +4,10 @@ State on 11 November 2026, written for whoever continues (a person or a Claude s
 `physics-simulation-toolchain` (it points to `openfoam-cfd`, `fem-multiphysics`, `topology-optimisation`, `jax-differentiable-physics`,
 `kaggle-gpu-run`). For putting a result on the website, read `docs/website-delivery.md`.
 
-**Honest state:** everything below was built and measured in a local sandbox. At the time of writing nothing was pushed to GitHub, no
-image was built by GitHub Actions, and nothing was published. "Verified" means "run here, inside the image, with the number shown". Where a
-number comes from GitHub or Kaggle it says so; until then those lines read "not yet run".
+**Honest state (12 November 2026):** the repository is public at github.com/Numa1997/phyein-sim. Both images were built by GitHub Actions,
+passed their self-tests there (foam 12 s, fem 105 s) and are public on ghcr.io. Every worked example below was then run on GitHub's standard
+runners through `run-case` and reproduced the sandbox numbers digit for digit. Kaggle: the native install path exists (`kaggle/`) but is **not yet
+proven on Kaggle**: the test session had no internet (see "Kaggle" below). The JAX GPU run has not been done.
 
 ## What this is
 
@@ -32,31 +33,47 @@ one-line pointer to the new one.
 | runners | `tools/foam_run.sh`, `tools/fem_run.sh` | `NAME=value` overrides, wall time, exit code = benchmark verdict |
 | film | `tools/film.py`, `tools/film.sh` | ParaView → H.264 yuv420p faststart; text bar; camera fitted to the bounds |
 | web | `tools/web_export.py`, `docs/website-delivery.md` | film + still + one JSON, size guard (25 MiB host limit) |
+| Kaggle | `kaggle/bootstrap.sh`, `env.sh`, `kernel.py`, `README.md` | native install of the same releases where Docker is not allowed; same cases and checks |
 | workflows | `.github/workflows/image-foam.yml`, `image-fem.yml`, `run-case.yml` | build → self-test → push to ghcr.io; `run-case` runs one case or a sweep (max 20 at once), uploads artifacts even on failure, exits with the case verdict |
 | skills | `skills/` | `physics-simulation-toolchain`, `openfoam-cfd`, `fem-multiphysics` (new); `topology-optimisation` (new sections 2.15 and 2.16 in `NEW_SECTIONS.md`); the master replaces `topopt-toolchain` |
 
 Structural topology optimisation (SIMP, the chair, MBB) stays in `phyein-topopt` with its own image and workflow `run.yml`; see that
 repository's `HANDOVER.md`. `run-case` here covers `foam` and `fem` only.
 
-## Measured results (sandbox, 2 cores, inside the image)
+## Measured results
 
-| case | benchmark | measured | time |
-|---|---|---|---|
-| lid-driven cavity N=32 | Ghia, Ghia & Shin 1982 | max difference 0.0042 (N=64: 0.0049) | 3 s (N=64: about 40 s) |
-| dam break | Martin & Moyce 1952 | max difference of the surge time 0.196 (scaled units); front 1.73 vs 1.71 | 55 s |
-| sloshing, cylinder | Lamb f11 with surface tension | +0.77 % in frequency | 106 s |
-| sloshing, tulip glass | same, at its own fill | +0.33 % | 129 s |
-| cylinder wake, Re = 100 | Williamson / Henderson | Strouhal −2.9 %, C_D +0.8 % | 339 s |
-| electron lens, aperture | Davisson & Calbick | −0.01 % | 39 s |
-| electron lens, einzel | paraxial ray equation | −0.20 % (not yet against an independent published value) | 48 s |
-| beam modes | Euler–Bernoulli, CalculiX | +0.13 %, −0.60 %, −1.75 % (modes 1–3); CalculiX vs DOLFINx 0.02 % | 9 s |
-| heat | analytic solution | 1.3·10⁻⁵ | 2 s |
-| fluid topology optimisation | Poiseuille P = 12 μ L Q² / w³ | −0.9 %; double channel −2 % | 27 s; 32 s |
-| JAX swing-up, 256 optimisations, float32 | — | works; 64-bit would be about 32 times slower on a T4 | 95 s on CPU |
+Errors are identical in the sandbox and on GitHub. Times: wall-clock of the case itself (image pull, about 1 minute per job, and film come on top).
 
-All are under the 15-minute limit on 2 cores; GitHub's public runners have 4 cores, so they should be faster (**not yet measured there**).
-Not yet verified: any GitHub Actions run, any ghcr push, the GPU timing, whether the −0.9 % of the fluid optimisation is separated into its two
-causes (finite α_max leak and discretisation), the einzel lens against an independent published value.
+| case | benchmark | measured error | sandbox, 2 cores | GitHub runner, 4 cores |
+|---|---|---|---|---|
+| lid-driven cavity N=32 (N=64) | Ghia, Ghia & Shin 1982 | 0.0042 of U (0.0049) | 3 s (40 s) | 4 s (46 s) |
+| dam break, Na=20 | Martin & Moyce 1952 | surge time within 0.196 (scaled units); front speed 1.73 vs 1.71 | 55 s | 57 s |
+| sloshing, cylinder | Lamb f11 | +0.77 % in frequency (+0.03 % with surface tension) | 106 s | 110 s |
+| sloshing, tulip glass, h = 125 mm | the website's own value | +0.33 % | 129 s | 115 s |
+| cylinder wake, Re = 100 | Williamson / Henderson | Strouhal −2.9 %, C_D +0.8 % | 339 s | 194 s |
+| electron lens, aperture | Davisson & Calbick | −0.01 % | 39 s | 23 s |
+| electron lens, einzel | paraxial ray equation on the same field | −0.20 % (no independent published value yet) | 48 s | 29 s |
+| beam modes | Euler–Bernoulli; CalculiX cross-check 0.02 % | +0.13 %, −0.60 %, −1.75 % | 9 s | 7 s |
+| heat | analytic solution | 1.3·10⁻⁵ | 2 s | 1 s |
+| fluid topology optimisation | Poiseuille P = 12 μ L Q² / w³ | −0.9 % (double channel −2 %) | 27 s (32 s) | 26 s (26 s) |
+| JAX swing-up, 256 optimisations, float32 | none (gradient checked against finite differences) | works | 95 s on CPU | not run |
+
+Every example is far below the 15-minute limit on its stated hardware (the GitHub runner). The runner is about as fast as the sandbox per core; only
+cases that use 4 MPI ranks (cylinder) gain. A finer dam break (Na=40, 4 times the cells) took 728 s on the runner and gave the same answer (0.197; front speed 1.72): the
+difference from the paper is therefore not a grid effect. Artifacts are large for free-surface cases (about 90 MB zipped for the dam break) because all time steps are kept for re-filming.
+
+Not yet verified: the Kaggle path on Kaggle, the GPU timing, whether the −0.9 % of the fluid optimisation separates into its two causes (finite α_max
+leak and discretisation), the einzel lens against an independent published value.
+
+## Kaggle
+
+Kaggle cannot run Docker. `kaggle/bootstrap.sh` installs the same releases natively and `kaggle/kernel.py` is a ready script notebook that clones
+this repository at a chosen commit, installs, runs the case with the same runner and check, and leaves `result.json` and `timing.json` as output
+(`kaggle/README.md`). Measured facts about a Kaggle CPU session (12 November 2026): Ubuntu 24.04, Python 3.13, NumPy 2.1, 4 cores, 31 GB, 12 h.
+Use Kaggle for one long or memory-hungry run; use GitHub for sweeps. The GPU helps JAX only.
+**Blocker found:** the first test session had no internet although the switch was saved as on (`Temporary failure resolving ...`); Kaggle gives
+internet and GPU only to phone-verified accounts. Until the account is verified nothing can be installed there. After verification: rerun the test
+(`kernel.py` with `TOOL="foam"`, `CASE="cavity"`), then record the install and run times here.
 
 ## The projects: tool, example, time, look, sentence
 
@@ -90,9 +107,10 @@ FEniCSx (the free GPU is Kaggle's, for JAX only); 3D fluid topology optimisation
 ## Open items
 
 - A folder `runs/cyl_f15` could not be deleted by the sandbox (a safety rule blocked the delete). It is scratch output and is excluded by `.gitignore`.
-- Every outward action (create repository, push, start Actions, make packages public, pointer push to `phyein-topopt`, SiteTest branch and merge, each Kaggle run)
-  needs the owner's explicit yes and had none at the time of writing.
-- Skills were written and checked against the repository, but a fresh-session end-to-end test is still to be done and recorded here.
+- Done with the owner's yes on 11–12 November 2026: repository created (by the owner; the session may not create public repositories), pushed, images built, nine `run-case` runs,
+  pointer line in `phyein-topopt`. Not done: a SiteTest page, the Kaggle GPU run. Each further outward action needs its own yes.
+- The first push of each new ghcr.io package was refused ("denied") after the layers had uploaded; a second run of the workflow succeeded. Cause unknown; re-run once.
+- Skills: the run commands of the master and fem skills were followed literally in clean containers and reproduced their numbers; a separate fresh chat session has not been tried.
 
 ## Failure modes met while building (short list; full list in the master skill, section 7)
 
