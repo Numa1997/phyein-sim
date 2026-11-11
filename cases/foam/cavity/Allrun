@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+cd "${0%/*}" || exit
+blockMesh > log.blockMesh 2>&1
+icoFoam   > log.icoFoam 2>&1

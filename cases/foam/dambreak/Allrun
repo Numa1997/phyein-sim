@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+cd "${0%/*}" || exit
+rm -rf 0 && cp -r 0.orig 0
+blockMesh > log.blockMesh 2>&1
+setFields > log.setFields 2>&1
+interFoam > log.interFoam 2>&1

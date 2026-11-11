@@ -1,0 +1,21 @@
+FoamFile { version 2.0; format ascii; class dictionary; object controlDict; }
+#include "<case>/params"
+application interFoam;
+startFrom startTime; startTime 0;
+stopAt endTime; endTime $tEnd;
+deltaT $dt;
+adjustTimeStep no; maxCo 0.5; maxAlphaCo 0.5; maxDeltaT 1;
+writeControl runTime; writeInterval #eval{ $tEnd/40 };   // 40 frames for the film
+writeFormat ascii; writePrecision 8; timeFormat general; timePrecision 8;
+purgeWrite 0;
+runTimeModifiable false;
+functions
+{
+    // alpha.water on a vertical line near the wall (x = 0.9 R, y = 0): integrating it gives the surface height there
+    wallLine
+    {
+        type sets; libs (sampling); writeControl timeStep; writeInterval $sample;
+        interpolationScheme cellPoint; setFormat raw; fields (alpha.water);
+        sets ( line { type uniform; axis z; start (#eval{0.9*$R} 0 0); end (#eval{0.9*$R} 0 $H); nPoints #eval{ round($H/0.0005) }; } );
+    }
+}

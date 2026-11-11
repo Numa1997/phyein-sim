@@ -1,0 +1,3 @@
+# pip layer of phyein-fem (DOLFINx, PETSc, mpi4py, numpy, scipy, matplotlib, Gmsh come from the base image)
+vtk==9.7.2
+pyvista==0.49.2

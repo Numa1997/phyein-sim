@@ -1,0 +1,94 @@
+name: run-case
+# Run one case, or a sweep of many cases in parallel, in a published image.  Start it from the Actions tab ("Run workflow")
+# or by REST:  POST /repos/<owner>/phyein-sim/actions/workflows/run-case.yml/dispatches  {"ref":"main","inputs":{...}}
+#
+# tool    foam | fem                 which image  (structural topology optimisation keeps its own workflow in the phyein-topopt repository)
+# case    path below cases/<tool>/   e.g. dambreak, slosh, cylinder, cavity   (fem: lens, beam, heat, ...)
+# set     NAME=value NAME=value      overrides of the case's `params` (all runs)
+# sweep   NAME=v1,v2;NAME2=w1,w2     Cartesian product, one parallel job per combination (max 20 at once on GitHub)
+# film    FIELD[:vmin:vmax]          optional: render a film of that field (foam cases; ParaView + ffmpeg)
+on:
+  workflow_dispatch:
+    inputs:
+      tool:  {description: "foam or fem", required: true, default: foam, type: choice, options: [foam, fem]}
+      case:  {description: "case name, e.g. dambreak", required: true, default: cavity}
+      set:   {description: "overrides for every run, e.g. Na=40 eps=0.03", default: ""}
+      sweep: {description: "parallel sweep, e.g. Na=20,40,80;Re=100,400", default: ""}
+      film:  {description: "e.g. alpha.water:0:1 (empty = no film)", default: ""}
+      np:    {description: "MPI ranks per run (foam; max 4 on a standard runner)", default: "4"}
+      label: {description: "name for the artifacts", default: "run"}
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+      image:  ${{ steps.m.outputs.image }}
+    steps:
+      - id: m
+        env:
+          SWEEP: ${{ inputs.sweep }}
+          TOOL:  ${{ inputs.tool }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, json, itertools
+          owner = os.environ.get("GITHUB_REPOSITORY_OWNER", "").lower()
+          tool = os.environ["TOOL"]
+          image = {"foam": "phyein-foam", "fem": "phyein-fem"}[tool]
+          axes = []
+          for part in filter(None, (s.strip() for s in os.environ["SWEEP"].split(";"))):
+              k, v = part.split("=", 1)
+              axes.append([f"{k.strip()}={x.strip()}" for x in v.split(",")])
+          combos = [" ".join(c) for c in itertools.product(*axes)] if axes else [""]
+          if len(combos) > 60: raise SystemExit("sweep has more than 60 combinations")
+          matrix = {"include": [{"id": i, "sweep": c} for i, c in enumerate(combos)]}
+          print("matrix=" + json.dumps(matrix))
+          print(f"image=ghcr.io/{owner}/{image}:latest")
+          PY
+  run:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4          # only so that cases edited after the last image build can be used (mounted over the image's copy)
+      - name: Run
+        env:
+          IMAGE: ${{ needs.plan.outputs.image }}
+          TOOL:  ${{ inputs.tool }}
+          CASE:  ${{ inputs.case }}
+          SET:   ${{ inputs.set }}
+          SWEEP: ${{ matrix.sweep }}
+          FILM:  ${{ inputs.film }}
+          NP:    ${{ inputs.np }}
+        run: |
+          mkdir -p out
+          docker pull "$IMAGE"
+          docker run --rm -v "$PWD/out:/out" -v "$PWD/cases:/opt/phyein-sim/cases:ro" -v "$PWD/tools:/opt/phyein-sim/tools:ro" \
+            -e TOOL -e CASE -e SET -e SWEEP -e FILM -e NP "$IMAGE" bash -c '
+            set -o pipefail
+            case "$TOOL" in foam) runner=foam_run.sh;; fem) runner=fem_run.sh;; *) echo "unknown tool $TOOL"; exit 2;; esac
+            export OUT=/out/run NP
+            start=$(date +%s)
+            /opt/phyein-sim/tools/$runner /opt/phyein-sim/cases/$TOOL/$CASE $SET $SWEEP 2>&1 | tee /out/log.txt
+            rc=${PIPESTATUS[0]}      # the benchmark verdict: non-zero = the case ran but missed its benchmark (or crashed)
+            echo "wall time: $(( $(date +%s) - start )) s" | tee -a /out/log.txt
+            if [ -n "$FILM" ] && [ "$TOOL" = foam ]; then
+              IFS=: read field vmin vmax <<< "$FILM"
+              /opt/phyein-sim/tools/film.sh /out/run "$field" /out/film.mp4 ${vmin:+$vmin} ${vmax:+$vmax} || echo "film failed"
+            fi
+            # keep only what is worth downloading: results, logs, postProcessing, films, a few fields
+            cd /out/run 2>/dev/null && rm -rf processor* constant/polyMesh 2>/dev/null
+            exit $rc'
+      - uses: actions/upload-artifact@v4
+        if: always()                       # a failed run is the one whose log and result.json you want
+        with:
+          name: ${{ inputs.label }}-${{ inputs.case }}-${{ matrix.id }}
+          path: out/
+          if-no-files-found: warn

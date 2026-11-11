@@ -1,0 +1,73 @@
+FoamFile { version 2.0; format ascii; class dictionary; object blockMeshDict; }
+#include "<case>/params"
+vertices
+(
+    (#eval{-$a} #eval{-$a} 0)
+    ($a #eval{-$a} 0)
+    ($a $a 0)
+    (#eval{-$a} $a 0)
+    (#eval{-$xu} #eval{-$yh} 0)
+    (#eval{-$B} #eval{-$yh} 0)
+    ($B #eval{-$yh} 0)
+    ($xd #eval{-$yh} 0)
+    (#eval{-$xu} #eval{-$B} 0)
+    (#eval{-$B} #eval{-$B} 0)
+    ($B #eval{-$B} 0)
+    ($xd #eval{-$B} 0)
+    (#eval{-$xu} $B 0)
+    (#eval{-$B} $B 0)
+    ($B $B 0)
+    ($xd $B 0)
+    (#eval{-$xu} $yh 0)
+    (#eval{-$B} $yh 0)
+    ($B $yh 0)
+    ($xd $yh 0)
+    (#eval{-$a} #eval{-$a} $depth)
+    ($a #eval{-$a} $depth)
+    ($a $a $depth)
+    (#eval{-$a} $a $depth)
+    (#eval{-$xu} #eval{-$yh} $depth)
+    (#eval{-$B} #eval{-$yh} $depth)
+    ($B #eval{-$yh} $depth)
+    ($xd #eval{-$yh} $depth)
+    (#eval{-$xu} #eval{-$B} $depth)
+    (#eval{-$B} #eval{-$B} $depth)
+    ($B #eval{-$B} $depth)
+    ($xd #eval{-$B} $depth)
+    (#eval{-$xu} $B $depth)
+    (#eval{-$B} $B $depth)
+    ($B $B $depth)
+    ($xd $B $depth)
+    (#eval{-$xu} $yh $depth)
+    (#eval{-$B} $yh $depth)
+    ($B $yh $depth)
+    ($xd $yh $depth)
+);
+blocks
+(
+    hex (9 10 1 0 29 30 21 20) ($n1 $n2 1) simpleGrading (1 $iGr 1)
+    hex (10 14 2 1 30 34 22 21) ($n1 $n2 1) simpleGrading (1 $iGr 1)
+    hex (14 13 3 2 34 33 23 22) ($n1 $n2 1) simpleGrading (1 $iGr 1)
+    hex (13 9 0 3 33 29 20 23) ($n1 $n2 1) simpleGrading (1 $iGr 1)
+    hex (4 5 9 8 24 25 29 28) ($nu_c $nh_c 1) simpleGrading ($iGu $iGu 1)
+    hex (5 6 10 9 25 26 30 29) ($n1 $nh_c 1) simpleGrading (1 $iGu 1)
+    hex (6 7 11 10 26 27 31 30) ($nd_c $nh_c 1) simpleGrading ($Gd $iGu 1)
+    hex (8 9 13 12 28 29 33 32) ($nu_c $n1 1) simpleGrading ($iGu 1 1)
+    hex (10 11 15 14 30 31 35 34) ($nd_c $n1 1) simpleGrading ($Gd 1 1)
+    hex (12 13 17 16 32 33 37 36) ($nu_c $nh_c 1) simpleGrading ($iGu $Gu 1)
+    hex (13 14 18 17 33 34 38 37) ($n1 $nh_c 1) simpleGrading (1 $Gu 1)
+    hex (14 15 19 18 34 35 39 38) ($nd_c $nh_c 1) simpleGrading ($Gd $Gu 1)
+);
+edges
+(
+    arc 0 1 (0 #eval{-$R} 0)  arc 1 2 ($R 0 0)  arc 2 3 (0 $R 0)  arc 3 0 (#eval{-$R} 0 0)
+    arc 20 21 (0 #eval{-$R} $depth)  arc 21 22 ($R 0 $depth)  arc 22 23 (0 $R $depth)  arc 23 20 (#eval{-$R} 0 $depth)
+);
+boundary
+(
+    cylinder { type wall; faces ((0 1 21 20) (1 2 22 21) (2 3 23 22) (3 0 20 23)); }
+    inlet { type patch; faces ((4 8 28 24) (8 12 32 28) (12 16 36 32)); }
+    outlet { type patch; faces ((11 7 27 31) (15 11 31 35) (19 15 35 39)); }
+    sides { type symmetry; faces ((4 5 25 24) (5 6 26 25) (6 7 27 26) (17 16 36 37) (18 17 37 38) (19 18 38 39)); }
+    frontAndBack { type empty; faces ((9 10 1 0) (20 21 30 29) (10 14 2 1) (21 22 34 30) (14 13 3 2) (22 23 33 34) (13 9 0 3) (23 20 29 33) (8 9 5 4) (24 25 29 28) (9 10 6 5) (25 26 30 29) (10 11 7 6) (26 27 31 30) (12 13 9 8) (28 29 33 32) (14 15 11 10) (30 31 35 34) (16 17 13 12) (32 33 37 36) (17 18 14 13) (33 34 38 37) (18 19 15 14) (34 35 39 38)); }
+);

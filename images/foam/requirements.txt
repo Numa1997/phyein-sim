@@ -1,0 +1,4 @@
+# pip layer of phyein-foam (OpenFOAM, ParaView, numpy, scipy, matplotlib come from the base/apt)
+gmsh==4.15.2
+vtk==9.7.2
+pyvista==0.49.2

@@ -1,0 +1,29 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Dam break (collapse of a water column on a dry floor), 2D, interFoam.
+  Benchmark: Martin & Moyce (1952), Phil. Trans. R. Soc. A 244, 312-324, Table 2 (n^2 = 2).
+  Every physical and numerical choice lives here.
+\*---------------------------------------------------------------------------*/
+FoamFile { version 2.0; format ascii; class dictionary; object params; }
+a     0.1;       // m, width of the water column (Martin & Moyce: semi-base length)
+n2    2;         // height / width of the column, H0 = n2 a  (n2 = 1, 2, 4 in the paper)
+Na    20;        // cells across the column width a
+Lxa   16;        // tank length in units of a (the front must not reach the far wall before Tend)
+Lya   3;         // tank height in units of a (must exceed n2)
+Tend  9.5;        // end time in Martin & Moyce units T = n t sqrt(g/a)
+Co    0.5;       // maximum Courant number (also used for the interface Courant number)
+g     9.81;      // m/s^2
+rhoW  1000;      // kg/m^3
+rhoA  1;         // kg/m^3
+nuW   1e-6;      // m^2/s
+nuA   1.48e-5;   // m^2/s
+sigma 0.07;      // N/m, surface tension
+nx    #eval{ round($Na*$Lxa) };
+ny    #eval{ round($Na*$Lya) };
+Lx    #eval{ $a*$Lxa };            // m
+Ly    #eval{ $a*$Lya };            // m
+H0    #eval{ $a*$n2 };             // m, initial column height
+tEnd  #eval{ $Tend*sqrt($a/$g)/sqrt($n2) };   // s, from T = n t sqrt(g/a) with n = sqrt(n2)
+dx    #eval{ $a/$Na };             // m
+yRow  #eval{ 0.5*$a/$Na };         // m, height of the first cell row, where the front is read
+dtMax #eval{ $tEnd/200 };
+depth #eval{ $dx };                // m, thickness of the single layer (2D)

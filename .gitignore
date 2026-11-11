@@ -1,0 +1,6 @@
+runs/
+out/
+__pycache__/
+*.pyc
+processor*/
+*.foam

@@ -1,0 +1,17 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Lid-driven cavity: every physical and numerical choice lives here.
+  Change a number here (or run.sh VAR=value) and nothing else in the case needs editing.
+\*---------------------------------------------------------------------------*/
+FoamFile { version 2.0; format ascii; class dictionary; object params; }
+
+L    1;          // m, side of the square cavity
+U    1;          // m/s, lid speed
+Re   100;        // Reynolds number U L / nu  (Ghia et al. 1982 tabulate 100 ... 10000)
+N    64;         // cells per side
+Co   0.25;       // Courant number U dt / dx, sets the time step
+nTurn 40;        // simulated time in lid-passing times L/U (steady state by about 25 at Re=100)
+nu   #eval{ $U*$L/$Re };      // m^2/s
+dx   #eval{ $L/$N };          // m
+dt   #eval{ $Co*$dx/$U };     // s
+tEnd #eval{ $nTurn*$L/$U };   // s
+depth #eval{ 0.1*$L };        // m, thickness of the single layer of cells (2D case)

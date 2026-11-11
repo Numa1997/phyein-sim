@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+cd "${0%/*}" || exit
+rm -rf 0 && cp -r 0.orig 0
+blockMesh > log.blockMesh 2>&1
+python3 init_fields.py . > log.init 2>&1 || { cat log.init; exit 1; }
+interFoam > log.interFoam 2>&1

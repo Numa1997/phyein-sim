@@ -1,0 +1,4 @@
+FoamFile { version 2.0; format ascii; class dictionary; object setFieldsDict; }
+#include "<case>/params"
+defaultFieldValues ( volScalarFieldValue alpha.water 0 );
+regions ( boxToCell { box (0 0 -1) ($a $H0 1); fieldValues ( volScalarFieldValue alpha.water 1 ); } );

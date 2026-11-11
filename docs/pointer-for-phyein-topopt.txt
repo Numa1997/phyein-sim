@@ -1,0 +1,3 @@
+One line for the top of phyein-topopt/README.md (to be added only after the owner's yes):
+
+> General physics toolchain (OpenFOAM, FEM, JAX, website delivery) now lives in [phyein-sim](https://github.com/<owner>/phyein-sim); this repository keeps the structural topology-optimisation code and its image.

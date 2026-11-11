@@ -1,0 +1,5 @@
+FoamFile { version 2.0; format ascii; class dictionary; object setFieldsDict; }
+#include "<case>/params"
+// a small upward kick behind the cylinder breaks the up-down symmetry so that the street starts early
+defaultFieldValues ( volVectorFieldValue U ($U 0 0) );
+regions ( boxToCell { box (#eval{0.6*$D} 0 -1) (#eval{4*$D} #eval{1.5*$D} 1); fieldValues ( volVectorFieldValue U ($U #eval{0.2*$U} 0) ); } );

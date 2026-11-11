@@ -1,0 +1,3 @@
+FoamFile { version 2.0; format ascii; class dictionary; object decomposeParDict; }
+numberOfSubdomains 2;       // foam_run.sh / Allrun rewrite this from NP
+method scotch;

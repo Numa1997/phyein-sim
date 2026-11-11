@@ -1,0 +1,23 @@
+FoamFile { version 2.0; format ascii; class dictionary; object controlDict; }
+#include "<case>/params"
+application icoFoam;
+startFrom startTime; startTime 0;
+stopAt endTime; endTime $tEnd;
+deltaT $dt;
+writeControl runTime; writeInterval $tEnd;   // write only the final field
+writeFormat ascii; writePrecision 8; timeFormat general; timePrecision 8;
+runTimeModifiable false;
+functions
+{
+    // u along the vertical centre line x = L/2, and v along the horizontal one y = L/2 (z in the middle of the layer)
+    centreLines
+    {
+        type sets; libs (sampling); writeControl writeTime;
+        interpolationScheme cellPoint; setFormat raw; fields (U);
+        sets
+        (
+            vertical   { type uniform; axis y; start (#eval{0.5*$L} 0 #eval{0.5*$depth}); end (#eval{0.5*$L} $L #eval{0.5*$depth}); nPoints 801; }
+            horizontal { type uniform; axis x; start (0 #eval{0.5*$L} #eval{0.5*$depth}); end ($L #eval{0.5*$L} #eval{0.5*$depth}); nPoints 801; }
+        );
+    }
+}

@@ -1,0 +1,7 @@
+FoamFile { version 2.0; format ascii; class dictionary; object fvSchemes; }
+ddtSchemes { default Euler; }
+gradSchemes { default Gauss linear; grad(p) Gauss linear; }
+divSchemes { default none; div(phi,U) Gauss linear; }   // central differencing: second order, fine at Re <= 1000 with a fine grid
+laplacianSchemes { default Gauss linear orthogonal; }
+interpolationSchemes { default linear; }
+snGradSchemes { default orthogonal; }

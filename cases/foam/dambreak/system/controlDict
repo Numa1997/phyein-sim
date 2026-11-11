@@ -1,0 +1,21 @@
+FoamFile { version 2.0; format ascii; class dictionary; object controlDict; }
+#include "<case>/params"
+application interFoam;
+startFrom startTime; startTime 0;
+stopAt endTime; endTime $tEnd;
+deltaT #eval{ $dtMax/20 };
+writeControl runTime; writeInterval #eval{ $tEnd/100 };   // 100 frames: used for the film and for the front position
+writeFormat ascii; writePrecision 8; timeFormat general; timePrecision 8;
+purgeWrite 0;
+adjustTimeStep yes; maxCo $Co; maxAlphaCo $Co; maxDeltaT $dtMax;
+runTimeModifiable false;
+functions
+{
+    // alpha.water along the first row of cells (the floor): the front is where it drops through 0.5
+    floorLine
+    {
+        type sets; libs (sampling); writeControl writeTime;
+        interpolationScheme cellPoint; setFormat raw; fields (alpha.water);
+        sets ( floor { type uniform; axis x; start (0 $yRow #eval{0.5*$depth}); end ($Lx $yRow #eval{0.5*$depth}); nPoints #eval{ 4*$nx }; } );
+    }
+}

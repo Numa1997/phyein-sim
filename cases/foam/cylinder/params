@@ -1,0 +1,41 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Flow past a circular cylinder, 2D, laminar vortex street (icoFoam).
+  Benchmarks: Strouhal number St = f D / U and mean drag coefficient CD = F / (rho U^2 D / 2) at Re = 100,
+  Williamson (1989) J. Fluid Mech. 206, 579 (St = 0.164 at Re = 100); Henderson (1995) J. Fluid Mech. 285, 69 (CD).
+\*---------------------------------------------------------------------------*/
+FoamFile { version 2.0; format ascii; class dictionary; object params; }
+D     1;         // m, cylinder diameter (the case is non-dimensional: lengths in D, speeds in U)
+U     1;         // m/s, free stream
+Re    100;       // U D / nu
+Lu    10;        // upstream length in D (inlet to the cylinder centre)
+Ld    30;        // downstream length in D
+Hh    30;        // total height in D (blockage D/H = 1/Hh)
+b     2;         // half side of the square that carries the O-grid, in D
+Nf    1;         // mesh refinement factor: every cell count below is multiplied by it
+N1    24;        // cells over each 90 degrees of the cylinder surface
+N2    30;        // radial cells from the cylinder to the square
+Nu    24;        // cells between inlet and square
+Nd    120;       // cells between square and outlet (wake)
+Nh    24;        // cells between square and each side wall
+Gr    8;         // radial expansion ratio in the O-grid (outer cell / inner cell)
+Gd    6;         // expansion in the wake (last / first cell)
+Gu    6;         // expansion towards the inlet and the side walls
+dt    0.01;      // time step in D/U (Courant number about 0.4 near the wall)
+tEnd  100;      // end time in D/U (shedding is fully developed after about 40)
+tAvg  40;        // statistics are taken over t > tAvg
+nu    #eval{ $U*$D/$Re };
+R     #eval{ 0.5*$D };
+a     #eval{ $R/sqrt(2) };
+B     #eval{ $b*$D };
+xu    #eval{ $Lu*$D };
+xd    #eval{ $Ld*$D };
+yh    #eval{ 0.5*$Hh*$D };
+depth #eval{ 0.1*$D };
+n1    #eval{ round($Nf*$N1) };
+n2    #eval{ round($Nf*$N2) };
+nu_c  #eval{ round($Nf*$Nu) };
+nd_c  #eval{ round($Nf*$Nd) };
+nh_c  #eval{ round($Nf*$Nh) };
+iGr   #eval{ 1.0/$Gr };
+iGu   #eval{ 1.0/$Gu };
+Aref  #eval{ $D*$depth };

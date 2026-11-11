@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  Free sloshing of a liquid in a vertical circular tank (3D, interFoam), released from a small planar tilt.
+  Benchmark: linear sloshing theory  f11 = (1/2pi) sqrt( g xi11/R tanh(xi11 h/R) ),  xi11 = 1.8412  (Lamb, Hydrodynamics, 257)
+  and the value 3.382 Hz quoted on the Guinness page for R = 40 mm, h = 100 mm.
+\*---------------------------------------------------------------------------*/
+FoamFile { version 2.0; format ascii; class dictionary; object params; }
+R     0.04;      // m, tank radius (the glass: see profile.csv, used when profile 1)
+h     0.10;      // m, still-liquid depth
+Hair  0.04;      // m, air space above the liquid
+eps   0.06;      // initial tilt of the free surface (z = h + eps x), amplitude eps R at the wall
+profile 0;       // 1 = scale the mesh radius with R(z) from profile.csv (tulip glass), 0 = plain cylinder
+Nc    8;         // cells along the side of the central square (radial cells Nr below)
+Nr    6;         // radial cells in each outer block
+Nz    #eval{ round(($h+$Hair)/0.0025) };    // cells in z (2.5 mm)
+nPeriods 5;      // simulated time, in linear periods
+g     9.81;
+rhoW  1000;
+rhoA  1;
+nuW   1e-6;
+nuA   1.48e-5;
+sigma 0.07;
+xi11  1.8412;
+fPage 3.421;     // Hz, f11 of the tulip glass at 125 mm fill on the Guinness page (Narimanov-Moiseev linear limit); used when profile 1
+H     #eval{ $h+$Hair };
+s     #eval{ 0.35*$R };                  // half side of the central square
+r     #eval{ $R/sqrt(2) };               // outer-block corner coordinate
+f11   #eval{ sqrt($g*$xi11/$R*tanh($xi11*$h/$R))/(2*pi()) };   // Hz, linear theory
+tEnd  #eval{ $nPeriods/$f11 };
+dt    5e-4;      // s, fixed time step (Courant number stays below 0.05: velocities are ~ eps R omega)
+sample 4;        // sample every 4 steps = 2 ms
