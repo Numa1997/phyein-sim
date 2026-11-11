@@ -71,8 +71,8 @@ Kaggle cannot run Docker. `kaggle/bootstrap.sh` installs the same releases nativ
 this repository at a chosen commit, installs, runs the case with the same runner and check, and leaves `result.json` and `timing.json` as output
 (`kaggle/README.md`). Measured facts about a Kaggle CPU session (12 November 2026): Ubuntu 24.04, Python 3.13, NumPy 2.1, 4 cores, 31 GB, 12 h.
 Use Kaggle for one long or memory-hungry run; use GitHub for sweeps. The GPU helps JAX only.
-**Blocker found:** the first test session had no internet although the switch was saved as on (`Temporary failure resolving ...`); Kaggle gives
-internet and GPU only to phone-verified accounts. Until the account is verified nothing can be installed there. After verification: rerun the test
+**Blocker found:** two test sessions (12 November 2026) had neither internet nor a GPU although both were requested and saved as on (`Temporary failure in
+name resolution`, no `nvidia-smi`, JAX 0.11.1 on CPU only); Kaggle gives internet and GPU only to phone-verified accounts. Until the account is verified nothing can be installed there. After verification: rerun the test
 (`kernel.py` with `TOOL="foam"`, `CASE="cavity"`), then record the install and run times here.
 
 ## The projects: tool, example, time, look, sentence
