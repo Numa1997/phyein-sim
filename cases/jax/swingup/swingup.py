@@ -106,7 +106,10 @@ eps = 1e-6 if dtype == jnp.float64 else 3e-3     # a step below the float32 reso
 gN = np.array([(cost(F_test.at[i].add(eps), l0) - cost(F_test.at[i].add(-eps), l0)) / (2 * eps) for i in idx])
 rep["gradient_rel_error"] = float(np.abs(np.asarray(gA)[idx] - gN).max() / np.abs(gN).max())
 print("physics tests:", json.dumps(rep, indent=1))
-assert abs(rep["period_rel_error"]) < 2e-3 and abs(rep["energy_drift_rel"]) < 1e-6 and rep["gradient_rel_error"] < (1e-5 if dtype == jnp.float64 else 5e-2), "a physics test failed"
+# Energy-drift limit by precision: in 64-bit it tests the RK4 truncation (measured 5e-9); in 32-bit rounding dominates, and its worst case over the
+# n = 400 steps of this free swing is n * eps32/2 = 400 * 6e-8 = 2.4e-5 (measured: 6e-7 on a CPU, 1.3e-6 on a Kaggle T4, 12 Nov 2026).
+drift_tol = 1e-6 if dtype == jnp.float64 else 2.4e-5
+assert abs(rep["period_rel_error"]) < 2e-3 and abs(rep["energy_drift_rel"]) < drift_tol and rep["gradient_rel_error"] < (1e-5 if dtype == jnp.float64 else 5e-2), "a physics test failed"
 
 # ---------------------------------------------------------------------------------------------------------------- 2. optimisation, batched
 lengths = jnp.linspace(l_min, l_max, LENGTHS).astype(dtype)

@@ -10,7 +10,8 @@ Physics, equations and checks are in the docstring of `swingup.py`. Output: `res
 | Forward model against theory | small-swing period within 2·10⁻⁵ of the analytic value; RK4 order 4.0 / 3.0 / 3.8 (64-bit); energy drift 5·10⁻⁹ (64-bit), 6·10⁻⁷ (32-bit) | this sandbox, CPU |
 | Gradient (reverse-mode AD) against central finite differences | 4·10⁻⁸ (64-bit), 4·10⁻³ (32-bit) | this sandbox, CPU |
 | 256 optimisations × 3000 steps, 32-bit | 95 s; 6 of 8 lengths arrive upright within about 2.2°, at rest | this sandbox, CPU |
-| The same on the Kaggle GPU | **not measured yet**: the first run measures it and writes it to `timing.json` | Kaggle |
+| Physics tests on a Kaggle T4, 32-bit (12 Nov 2026) | period within 2·10⁻⁵, energy drift 1.3·10⁻⁶ (inside the 32-bit rounding bound 2.4·10⁻⁵), gradient 5·10⁻³ | Kaggle |
+| The full run on the Kaggle GPU | see `HANDOVER.md` (the first run's `timing.json`) | Kaggle |
 
 Why 32-bit: Kaggle's default GPU (T4) is fast in 32-bit numbers and about 32 times slower in 64-bit. The 32-bit forward model and gradient pass their checks
 (numbers above), so the run uses `X64 = "0"`. Which random start wins differs between precisions (the search is not convex), so compare the best-of-64 efforts,
