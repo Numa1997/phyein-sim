@@ -6,8 +6,8 @@ State on 11 November 2026, written for whoever continues (a person or a Claude s
 
 **Honest state (12 November 2026):** the repository is public at github.com/Numa1997/phyein-sim. Both images were built by GitHub Actions,
 passed their self-tests there (foam 12 s, fem 105 s) and are public on ghcr.io. Every worked example below was then run on GitHub's standard
-runners through `run-case` and reproduced the sandbox numbers digit for digit. Kaggle: the native install path exists (`kaggle/`) but is **not yet
-proven on Kaggle**: the test session had no internet (see "Kaggle" below). The JAX GPU run has not been done.
+runners through `run-case` and reproduced the sandbox numbers digit for digit. Kaggle: the native install path (`kaggle/`) ran
+the cavity and beam cases on Kaggle with identical errors (see "Kaggle" below). The JAX GPU run has not been done.
 
 ## What this is
 
@@ -62,7 +62,7 @@ Every example is far below the 15-minute limit on its stated hardware (the GitHu
 cases that use 4 MPI ranks (cylinder) gain. A finer dam break (Na=40, 4 times the cells) took 728 s on the runner and gave the same answer (0.197; front speed 1.72): the
 difference from the paper is therefore not a grid effect. Artifacts are large for free-surface cases (about 90 MB zipped for the dam break) because all time steps are kept for re-filming.
 
-Not yet verified: the Kaggle path on Kaggle, the GPU timing, whether the −0.9 % of the fluid optimisation separates into its two causes (finite α_max
+Not yet verified: the GPU timing, whether the −0.9 % of the fluid optimisation separates into its two causes (finite α_max
 leak and discretisation), the einzel lens against an independent published value.
 
 ## Kaggle
@@ -71,9 +71,10 @@ Kaggle cannot run Docker. `kaggle/bootstrap.sh` installs the same releases nativ
 this repository at a chosen commit, installs, runs the case with the same runner and check, and leaves `result.json` and `timing.json` as output
 (`kaggle/README.md`). Measured facts about a Kaggle CPU session (12 November 2026): Ubuntu 24.04, Python 3.13, NumPy 2.1, 4 cores, 31 GB, 12 h.
 Use Kaggle for one long or memory-hungry run; use GitHub for sweeps. The GPU helps JAX only.
-**Blocker found:** two test sessions (12 November 2026) had neither internet nor a GPU although both were requested and saved as on (`Temporary failure in
-name resolution`, no `nvidia-smi`, JAX 0.11.1 on CPU only); Kaggle gives internet and GPU only to phone-verified accounts. Until the account is verified nothing can be installed there. After verification: rerun the test
-(`kernel.py` with `TOOL="foam"`, `CASE="cavity"`), then record the install and run times here.
+**Proven on Kaggle (12 November 2026, after the account's phone verification):** `kaggle/kernel.py` as a CPU script notebook, Internet on.
+foam: install 60 s, cavity N=32 error 0.0042 (identical to GitHub), run 8 s. fem: install 130 s, beam modes +0.13 / −0.60 / −1.75 %, CalculiX
+agreement 0.02 % (identical), run 17 s. Before verification the sessions had neither internet nor GPU (`Temporary failure in name resolution`):
+an unverified Kaggle account cannot install anything.
 
 ## The projects: tool, example, time, look, sentence
 

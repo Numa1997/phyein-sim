@@ -71,8 +71,8 @@ the 4-rank cylinder took 194 s against 339 s on 2 ranks (1.75×); FEM cases were
 installs the same releases natively (OpenFOAM v2512 from dl.openfoam.com; DOLFINx 0.11 from conda-forge with micromamba), `source kaggle/env.sh <tool>` puts the same runners on the PATH, and
 `kaggle/kernel.py` is the whole script notebook (edit OWNER, REF, TOOL, CASE, SETS, NP; Internet on, GPU off). Launch it with the Kaggle connector as the `kaggle-gpu-run` skill describes.
 The GPU helps JAX only; do not spend GPU quota on OpenFOAM or DOLFINx. No ParaView on Kaggle: film the downloaded run in the foam image. Sweeps belong on GitHub (20 at once).
-**State: the install path is not yet proven on Kaggle.** The first test session had no internet although the switch was saved as on; Kaggle gives internet (and GPU) only to
-phone-verified accounts. Check `HANDOVER.md`, section Kaggle, for whether this has been resolved before relying on it.
+**Proven on Kaggle** (12 Nov 2026): install 60 s (foam) and 130 s (fem); cavity 0.0042 and beam modes identical to GitHub. The account must be
+phone-verified, or the session has no internet and nothing installs.
 
 ### 3b. Structural topology optimisation (repository `phyein-topopt`, image `phyein-topopt`; this replaces the old `topopt-toolchain` skill)
 
