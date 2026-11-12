@@ -7,7 +7,7 @@ State on 11 November 2026, written for whoever continues (a person or a Claude s
 **Honest state (12 November 2026):** the repository is public at github.com/Numa1997/phyein-sim. Both images were built by GitHub Actions,
 passed their self-tests there (foam 12 s, fem 105 s) and are public on ghcr.io. Every worked example below was then run on GitHub's standard
 runners through `run-case` and reproduced the sandbox numbers digit for digit. Kaggle: the native install path (`kaggle/`) ran
-the cavity and beam cases on Kaggle with identical errors (see "Kaggle" below). The JAX GPU run has not been done.
+the cavity and beam cases on Kaggle with identical errors (see "Kaggle" below). The JAX swing-up ran on Kaggle's GPU.
 
 ## What this is
 
@@ -56,13 +56,16 @@ Errors are identical in the sandbox and on GitHub. Times: wall-clock of the case
 | beam modes | Euler–Bernoulli; CalculiX cross-check 0.02 % | +0.13 %, −0.60 %, −1.75 % | 9 s | 7 s |
 | heat | analytic solution | 1.3·10⁻⁵ | 2 s | 1 s |
 | fluid topology optimisation | Poiseuille P = 12 μ L Q² / w³ | −0.9 % (double channel −2 %) | 27 s (32 s) | 26 s (26 s) |
-| JAX swing-up, 256 optimisations, float32 | none (gradient checked against finite differences) | works | 95 s on CPU | not run |
+| JAX swing-up, float32 | small-swing period 2·10⁻⁵; gradient vs finite differences 5·10⁻³ | 52 of 64 lengths upright within 2° | 256 optimisations: 95 s on CPU | Kaggle T4: 4096 optimisations × 3000 steps in 154 s |
 
 Every example is far below the 15-minute limit on its stated hardware (the GitHub runner). The runner is about as fast as the sandbox per core; only
 cases that use 4 MPI ranks (cylinder) gain. A finer dam break (Na=40, 4 times the cells) took 728 s on the runner and gave the same answer (0.197; front speed 1.72): the
 difference from the paper is therefore not a grid effect. Artifacts are large for free-surface cases (about 90 MB zipped for the dam break) because all time steps are kept for re-filming.
 
-Not yet verified: the GPU timing, whether the −0.9 % of the fluid optimisation separates into its two causes (finite α_max
+JAX on the Kaggle GPU (12 November 2026, one T4 of the two, preinstalled JAX 0.11.1 sees the GPU): 1.25·10⁻⁵ s per Adam step per problem
+against 1.24·10⁻⁴ s on the sandbox CPU, about 10 times faster; whole session 7 minutes. Only `cuda:0` is used: the second T4 sits idle.
+
+Not yet verified: whether the −0.9 % of the fluid optimisation separates into its two causes (finite α_max
 leak and discretisation), the einzel lens against an independent published value.
 
 ## Kaggle
@@ -86,7 +89,7 @@ and the exact sentence to give a future session. "Built" means validated in the 
    surface, the standing-wave curve against Lamb. *Sentence:* "Run the `slosh` case with `profile=1 h=0.125` for the Guinness tulip glass and export it for Fig. 12."
 2. **Project 06, rods in liquid.** OpenFOAM `cylinder` (drag and vortex shedding), built: 339 s. A swinging rod needs fluid–structure coupling or a moving mesh: not built.
    *Sentence:* "Run the `cylinder` case at the project 06 Reynolds number and report St and C_D; a swinging rod needs a moving-mesh case, which does not exist yet."
-3. **Pendulum control and active suspension.** JAX `swingup`, built on CPU (95 s for 256 optimisations); GPU run needs one yes per run. Website: the swing-up film and the
+3. **Pendulum control and active suspension.** JAX `swingup`: 4096 optimisations in 154 s on a Kaggle T4 (52 of 64 lengths upright within 2°); each GPU run needs one yes. Website: the swing-up film and the
    controller-gain sweep plot. *Sentence:* "Use `cases/jax/swingup` and the kaggle-gpu-run skill; start with the 32-bit CPU check."
 4. **Droplet collection (thesis).** JAX Monte Carlo of coalescence checked against the Golovin kernel: planned, estimate a few minutes on CPU, seconds on a GPU. Not built.
    *Sentence:* "Build `cases/jax/droplets`: Monte Carlo coalescence against the Golovin analytic solution."
@@ -109,7 +112,7 @@ FEniCSx (the free GPU is Kaggle's, for JAX only); 3D fluid topology optimisation
 
 - A folder `runs/cyl_f15` could not be deleted by the sandbox (a safety rule blocked the delete). It is scratch output and is excluded by `.gitignore`.
 - Done with the owner's yes on 11–12 November 2026: repository created (by the owner; the session may not create public repositories), pushed, images built, nine `run-case` runs,
-  pointer line in `phyein-topopt`. Not done: a SiteTest page, the Kaggle GPU run. Each further outward action needs its own yes.
+  pointer line in `phyein-topopt`. Not done: a SiteTest page. The Kaggle GPU run was done (swing-up, 7 minutes of GPU time). Each further outward action needs its own yes.
 - The first push of each new ghcr.io package was refused ("denied") after the layers had uploaded; a second run of the workflow succeeded. Cause unknown; re-run once.
 - Skills: the run commands of the master and fem skills were followed literally in clean containers and reproduced their numbers; a separate fresh chat session has not been tried.
 

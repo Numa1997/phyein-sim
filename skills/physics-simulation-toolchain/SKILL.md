@@ -33,7 +33,7 @@ stills and a small data file to the website. Method details are in the companion
 | Vibration modes of beams and rotors; stress | FEniCSx + SLEPc, cross-check CalculiX | `fem/beam` | modes +0.13, −0.60, −1.75 %, CalculiX agrees 0.02 % (9 s) |
 | Heat, diffusion, any time-dependent PDE | FEniCSx θ-scheme | `fem/heat` | max error 1.3·10⁻⁵ of T₀ (2 s) |
 | Where to put material (solid), where to put liquid (channels) | `phyein-topopt` (solid); `fem/fluidtopo` (Stokes) | MBB, chair; straight channel | solid: MBB within 10⁻⁴ of the paper; fluid: −0.9 % vs Poiseuille (27 s) |
-| Optimal control, many parameter sets at once, derivatives | JAX | `jax/swingup` | gradient vs finite differences 4·10⁻⁸ (64-bit); 256 optimisations 95 s on CPU |
+| Optimal control, many parameter sets at once, derivatives | JAX | `jax/swingup` | gradient vs finite differences 4·10⁻⁸ (64-bit); 4096 optimisations in 154 s on a Kaggle T4 (≈10× the CPU) |
 | Not covered yet | see section 8 and `HANDOVER.md` | | |
 
 Rule of thumb: a **field in space** (u(x,t), φ(x), T(x,t)) → OpenFOAM or FEniCSx; a **shape** → topology optimisation; a **trajectory or a design vector with a
