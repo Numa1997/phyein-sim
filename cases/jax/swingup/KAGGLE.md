@@ -27,7 +27,7 @@ Screen labels change from time to time; cell 1 of the notebook is the real check
 2. Left menu: **Create** → **New Notebook**.
 3. In the notebook: **File** → **Import Notebook** (or the upload icon), choose `kaggle_swingup.ipynb` from this folder.
 4. Right-hand panel **Session options** (or **Settings**) → **Accelerator** → choose **GPU T4 ×2**. (Not P100: it is being retired.)
-5. Same panel: **Internet** → off (the notebook needs none; Kaggle's JAX build is preinstalled). If cell 1 reports `cpu` only, switch Internet **on** and add a first cell
+5. Same panel: **Internet** → **on** (cell 1 installs the CUDA build of JAX if Kaggle's preinstalled one sees no GPU)
    `!pip install -U "jax[cuda12]"`, then restart the session.
 6. **Run All** (top bar). Cell 1 prints the GPU name and fails at once if none is seen. Cell 4 runs a few-second smoke test, then the full run.
 7. When it has finished, open **Output** in the right panel (or the **Data** tab → **Output**), and download `full/swingup_data.json`, `full/swingup.png`,
