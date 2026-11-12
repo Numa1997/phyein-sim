@@ -11,7 +11,7 @@ import json, os, platform, shutil, subprocess, time
 W = "/kaggle/working"; R = "/kaggle/tmp/phyein-sim"
 def sh(cmd, **kw):
     print("$", cmd, flush=True)
-    return subprocess.run(["bash", "-c", cmd], **kw)
+    return subprocess.run(["bash", "-c", "set -o pipefail; " + cmd], **kw)   # pipefail: "| tail" must not hide a failure
 t = {"start": time.time()}
 print("cores:", os.cpu_count(), "| python:", platform.python_version(), "| machine:", platform.platform())
 sh("grep -m1 'model name' /proc/cpuinfo; free -g | sed -n 2p")
